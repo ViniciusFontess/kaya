@@ -85,7 +85,7 @@ CREATE TABLE payments (
   tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
   asaas_payment_id TEXT,
   status TEXT,
-  amount FLOAT,
+  amount NUMERIC(10,2),
   method TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -147,3 +147,14 @@ CREATE TRIGGER tenants_updated_at BEFORE UPDATE ON tenants
 
 CREATE TRIGGER agent_configs_updated_at BEFORE UPDATE ON agent_configs
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- Indexes for RLS performance
+CREATE INDEX idx_users_tenant_id ON users(tenant_id);
+CREATE INDEX idx_leads_tenant_id ON leads(tenant_id);
+CREATE INDEX idx_leads_last_message_at ON leads(last_message_at DESC);
+CREATE INDEX idx_conversations_tenant_id ON conversations(tenant_id);
+CREATE INDEX idx_conversations_lead_id ON conversations(lead_id);
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX idx_messages_tenant_id ON messages(tenant_id);
+CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
+CREATE INDEX idx_payments_tenant_id ON payments(tenant_id);
