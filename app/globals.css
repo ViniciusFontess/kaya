@@ -3,16 +3,16 @@
 @theme {
   --color-salmon: #FF91A4;
   --color-salmon-deep: #F26B85;
-  --color-salmon-ink: #C44569;
+  --color-salmon-ink: #8A2238;
   --color-rose: #FFD1DC;
   --color-rose-soft: #FFE6EC;
   --color-cream: #FAF6F2;
   --color-paper: #FFFFFF;
   --color-ink: #141414;
-  --color-ink-soft: #4A4A47;
+  --color-ink-soft: #2B2A28;
   --color-muted: #6B6A66;
-  --color-line: #E8E4E0;
-  --color-line-soft: #F0EDE9;
+  --color-line: #E9E4DD;
+  --color-line-soft: #F0EBE3;
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-serif: 'Instrument Serif', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
@@ -21,16 +21,16 @@
 :root {
   --salmon: #FF91A4;
   --salmon-deep: #F26B85;
-  --salmon-ink: #C44569;
+  --salmon-ink: #8A2238;
   --rose: #FFD1DC;
   --rose-soft: #FFE6EC;
   --cream: #FAF6F2;
   --paper: #FFFFFF;
   --ink: #141414;
-  --ink-soft: #4A4A47;
+  --ink-soft: #2B2A28;
   --muted: #6B6A66;
-  --line: #E8E4E0;
-  --line-soft: #F0EDE9;
+  --line: #E9E4DD;
+  --line-soft: #F0EBE3;
   --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   --serif: 'Instrument Serif', Georgia, serif;
   --mono: 'JetBrains Mono', 'Courier New', monospace;
