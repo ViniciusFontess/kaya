@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
   // Generate suggested reply
   const { data: configRow } = await service
     .from('agent_configs')
-    .select('tone, niche, knowledge_base')
+    .select('tone, niche, knowledge_base, calendar_url')
     .eq('tenant_id', tenantId)
     .maybeSingle()
 
@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
     tone: (configRow?.tone ?? 'descontraido') as AgentConfig['tone'],
     niche: configRow?.niche ?? 'geral',
     knowledge_base: configRow?.knowledge_base ?? '',
+    calendar_url: configRow?.calendar_url ?? undefined,
   }
 
   let replyText: string

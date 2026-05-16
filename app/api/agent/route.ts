@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   // Load agent config
   const { data: configRow } = await supabase
     .from('agent_configs')
-    .select('tone, niche, knowledge_base')
+    .select('tone, niche, knowledge_base, calendar_url')
     .eq('tenant_id', tenantId)
     .maybeSingle()
 
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
     tone: (configRow?.tone ?? 'descontraido') as AgentConfig['tone'],
     niche: configRow?.niche ?? 'geral',
     knowledge_base: configRow?.knowledge_base ?? '',
+    calendar_url: configRow?.calendar_url ?? undefined,
   }
 
   // Fetch last 10 messages for context
