@@ -21,11 +21,20 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    // If Supabase is unreachable, treat as unauthenticated
+  }
 
   // Redirect protected routes to login if not authenticated
   const protectedPaths = ['/dashboard', '/inbox', '/leads', '/settings', '/onboarding']
-  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  const isProtected = protectedPaths.some(p => {
+    const pathname = request.nextUrl.pathname
+    return pathname === p || pathname.startsWith(p + '/')
+  })
   if (!user && isProtected) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
