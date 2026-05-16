@@ -34,14 +34,8 @@ export function LandingHero() {
           </p>
 
           <div style={{ display: 'flex', gap: 14, marginTop: 36 }}>
-            <Link href="/auth/signup">
-              <button style={{
-                background: 'var(--ink)', color: '#fff', border: 0,
-                padding: '18px 28px', borderRadius: 999, fontSize: 16, fontWeight: 600,
-                fontFamily: 'inherit', cursor: 'pointer',
-              }}>
-                Conectar meu site →
-              </button>
+            <Link href="/auth/signup" style={{ background: 'var(--ink)', color: '#fff', padding: '18px 28px', borderRadius: 999, fontSize: 16, fontWeight: 600, fontFamily: 'var(--sans)', cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }}>
+              Conectar meu site →
             </Link>
             <button style={{
               background: 'transparent', color: 'var(--ink)',
@@ -55,7 +49,7 @@ export function LandingHero() {
           <div style={{
             marginTop: 40, display: 'flex', gap: 24,
             fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)',
-            letterSpacing: '0.04em', textTransform: 'uppercase',
+            letterSpacing: '0.04em', textTransform: 'uppercase' as const,
           }}>
             <span>10 min pra ativar</span>
             <span>·</span>
@@ -101,7 +95,7 @@ export function LandingHero() {
                   {msg.byKaya && (
                     <div style={{
                       fontSize: 9, color: 'var(--salmon-ink)', fontFamily: 'var(--mono)',
-                      textTransform: 'uppercase', marginBottom: 2,
+                      textTransform: 'uppercase' as const, marginBottom: 2,
                     }}>Kaya</div>
                   )}
                   <div style={{

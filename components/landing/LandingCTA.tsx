@@ -32,14 +32,8 @@ export function LandingCTA() {
           </h2>
 
           <div style={{ display: 'flex', gap: 16, marginTop: 48, alignItems: 'center' }}>
-            <Link href="/auth/signup">
-              <button style={{
-                background: 'var(--salmon)', color: 'var(--ink)', border: 0,
-                padding: '22px 36px', borderRadius: 999, fontSize: 18, fontWeight: 700,
-                fontFamily: 'inherit', cursor: 'pointer',
-              }}>
-                Conectar meu site →
-              </button>
+            <Link href="/auth/signup" style={{ background: 'var(--salmon)', color: 'var(--ink)', padding: '22px 36px', borderRadius: 999, fontSize: 18, fontWeight: 700, fontFamily: 'var(--sans)', cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }}>
+              Conectar meu site →
             </Link>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
               grátis nos primeiros 14 dias · sem cartão

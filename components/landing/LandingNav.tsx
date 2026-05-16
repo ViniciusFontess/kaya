@@ -18,14 +18,8 @@ export function LandingNav() {
           Login
         </Link>
       </div>
-      <Link href="/auth/signup">
-        <button style={{
-          background: 'var(--ink)', color: '#fff', border: 0,
-          padding: '12px 22px', borderRadius: 999, fontSize: 14, fontWeight: 600,
-          fontFamily: 'inherit', cursor: 'pointer',
-        }}>
-          Conectar meu site →
-        </button>
+      <Link href="/auth/signup" style={{ background: 'var(--ink)', color: '#fff', padding: '12px 22px', borderRadius: 999, fontSize: 14, fontWeight: 600, fontFamily: 'var(--sans)', cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }}>
+        Conectar meu site →
       </Link>
     </nav>
   )
