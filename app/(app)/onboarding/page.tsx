@@ -1,7 +1,7 @@
 // app/(app)/onboarding/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { TopBar } from '@/components/layout/TopBar'
@@ -26,7 +26,8 @@ const NICHES = ['Saúde/Clínica', 'Academia/Fitness', 'Imobiliária', 'Educaç�
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
+  const supabase = supabaseRef.current
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -207,6 +208,7 @@ export default function OnboardingPage() {
                 style={btnSecondary}
                 disabled={loading}
                 onClick={() => {
+                  setError('')
                   setState((s) => ({ ...s, knowledgeBase: '', siteTitle: '' }))
                   setStep(2)
                 }}
@@ -233,10 +235,10 @@ export default function OnboardingPage() {
             />
             {error && <div style={errorBox}>{error}</div>}
             <div>
-              <button style={btn} onClick={() => setStep(3)}>
+              <button style={btn} onClick={() => { setError(''); setStep(3) }}>
                 Continuar →
               </button>
-              <button style={btnSecondary} onClick={() => setStep(1)}>
+              <button style={btnSecondary} onClick={() => { setError(''); setStep(1) }}>
                 Voltar
               </button>
             </div>
@@ -291,7 +293,7 @@ export default function OnboardingPage() {
               <button style={btn} disabled={loading} onClick={activate}>
                 {loading ? 'Ativando…' : 'Ativar agente →'}
               </button>
-              <button style={btnSecondary} disabled={loading} onClick={() => setStep(2)}>
+              <button style={btnSecondary} disabled={loading} onClick={() => { setError(''); setStep(2) }}>
                 Voltar
               </button>
             </div>
