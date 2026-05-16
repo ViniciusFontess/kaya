@@ -16,7 +16,11 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (password.length < 6) { setError('Senha precisa ter ao menos 6 caracteres.'); return }
+    // Validate before setting loading state
+    if (password.length < 6) {
+      setError('Senha precisa ter ao menos 6 caracteres.')
+      return
+    }
     setLoading(true)
     setError('')
     const supabase = createClient()
@@ -49,12 +53,18 @@ export default function SignupPage() {
     }
 
     // 3. Insert into users table
-    await supabase.from('users').insert({
+    const { error: userError } = await supabase.from('users').insert({
       id: authData.user.id,
       tenant_id: tenant.id,
       email,
       role: 'owner',
     })
+
+    if (userError) {
+      setError('Conta criada mas erro ao salvar dados. Tente fazer login.')
+      setLoading(false)
+      return
+    }
 
     router.push('/onboarding')
     router.refresh()

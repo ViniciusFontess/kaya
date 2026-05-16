@@ -21,7 +21,7 @@ export function Sidebar({ tenantName = 'Meu Negócio' }: SidebarProps) {
     <div style={{
       width: 240, background: 'var(--cream)', borderRight: '1px solid var(--line)',
       display: 'flex', flexDirection: 'column', padding: 20,
-      flex: '0 0 240px', height: '100vh', position: 'sticky', top: 0,
+      flex: '0 0 240px', height: '100vh', position: 'sticky', top: 0, overflowY: 'auto',
     }}>
       <div style={{ padding: '8px 8px 24px' }}>
         <LogoWordmark size={22} />
