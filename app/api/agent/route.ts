@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     .from('agent_configs')
     .select('tone, niche, knowledge_base')
     .eq('tenant_id', tenantId)
-    .single()
+    .maybeSingle()
 
   const agentConfig: AgentConfig = {
     tone: (configRow?.tone ?? 'descontraido') as AgentConfig['tone'],
