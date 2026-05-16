@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
 import { redirect } from 'next/navigation'
 
-async function getStats(tenantId: string) {
-  const supabase = await createClient()
+async function getStats(supabase: Awaited<ReturnType<typeof createClient>>, tenantId: string) {
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
@@ -61,7 +60,7 @@ export default async function DashboardPage() {
 
   if (!userData?.tenant_id) redirect('/onboarding')
 
-  const stats = await getStats(userData.tenant_id)
+  const stats = await getStats(supabase, userData.tenant_id)
 
   const cards = [
     { icon: '👥', label: 'Total de leads', value: stats.totalLeads },
