@@ -30,21 +30,44 @@ export async function generateResponse(
   const { default: Anthropic } = await import('@anthropic-ai/sdk')
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+  // Fix 3: Truncate knowledge_base to 6000 chars
+  const kb = (agentConfig.knowledge_base ?? '').slice(0, 6_000)
+
   const systemPrompt = [
     `Você é Kaya, assistente de vendas de um negócio de ${agentConfig.niche}.`,
     `Tom: ${TONE_DESCRIPTIONS[agentConfig.tone]}.`,
-    `Sobre o negócio: ${agentConfig.knowledge_base}`,
+    `Sobre o negócio: ${kb}`,
     'Responda sempre em português, de forma concisa (máximo 3 parágrafos). Seja direto e útil.',
   ].join('\n')
 
-  const response = await client.messages.create({
-    model: 'claude-3-5-haiku-20241022',
-    max_tokens: 512,
-    system: systemPrompt,
-    messages,
-  })
+  try {
+    const response = await client.messages.create({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 512,
+      system: systemPrompt,
+      messages,
+    })
 
-  const block = response.content[0]
-  const text = block.type === 'text' ? block.text : ''
-  return { text, mock: false }
+    // Fix 2: Scan all content blocks for the first text block
+    const textBlock = response.content.find((b) => b.type === 'text')
+    if (!textBlock || textBlock.type !== 'text') {
+      console.warn('[claude] No text block in response')
+      return { text: '', mock: false }
+    }
+
+    if (response.stop_reason === 'max_tokens') {
+      console.warn('[claude] Response truncated at max_tokens (512)')
+    }
+
+    const text = textBlock.text
+    return { text, mock: false }
+  } catch (error) {
+    // Fix 1: Wrap API call in try/catch with user-facing error
+    const msg = error instanceof Error ? error.message : 'Erro desconhecido'
+    console.error('[claude] API error:', msg)
+    return {
+      text: `[Erro] Não foi possível gerar resposta: ${msg}`,
+      mock: true,
+    }
+  }
 }
