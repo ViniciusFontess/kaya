@@ -83,8 +83,9 @@ export default function InboxPage() {
       .select(`
         id,
         mode,
+        last_message_at,
         leads!lead_id (
-          id, name, phone, channel, status, tags, last_message_at
+          id, name, phone, channel, status, tags
         )
       `)
       .eq('tenant_id', tid)
@@ -96,14 +97,15 @@ export default function InboxPage() {
     const convs: Conversation[] = (data as unknown as Array<{
       id: string
       mode: string | null
-      leads: (Lead & { last_message_at?: string | null }) | (Lead & { last_message_at?: string | null })[] | null
+      last_message_at: string | null
+      leads: Lead | Lead[] | null
     }>).map((c) => {
       const lead = Array.isArray(c.leads) ? c.leads[0] : c.leads
       return {
         id: c.id,
         mode: c.mode,
         lead: lead as Lead | null,
-        last_message_at: lead?.last_message_at ?? null,
+        last_message_at: c.last_message_at ?? null,
       }
     })
 
@@ -198,12 +200,16 @@ export default function InboxPage() {
     setSendingMsg(true)
     const content = replyText.trim()
     setReplyText('')
-    await supabase.from('messages').insert({
+    const { error } = await supabase.from('messages').insert({
       conversation_id: selectedId,
       tenant_id: tenantId,
       role: 'assistant',
       content,
     })
+    if (error) {
+      console.error('[inbox] Failed to send message:', error.message)
+      setReplyText(content) // restore on failure
+    }
     setSendingMsg(false)
   }
 
@@ -426,7 +432,7 @@ export default function InboxPage() {
                           color: '#78350f',
                         }}
                       >
-                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Sugestao da IA:</div>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Sugestão da IA:</div>
                         <div style={{ marginBottom: 10 }}>{m.suggested_reply}</div>
                         <button
                           onClick={() => useAiSuggestion(m.suggested_reply!)}
@@ -518,7 +524,7 @@ export default function InboxPage() {
                       opacity: loadingReply ? 0.6 : 1,
                     }}
                   >
-                    {loadingReply ? 'Gerando…' : 'Pedir sugestao da IA'}
+                    {loadingReply ? 'Gerando…' : '✨ Pedir sugestão da IA'}
                   </button>
                 </div>
               </div>
@@ -622,7 +628,7 @@ export default function InboxPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  {selectedConv.mode === 'copilot' ? 'Modo copiloto ativo' : 'Assumir conversa'}
+                  {selectedConv.mode === 'copilot' ? '✅ Modo copiloto ativo' : 'Assumir conversa'}
                 </button>
               </div>
             </div>
