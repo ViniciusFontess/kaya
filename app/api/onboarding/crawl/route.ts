@@ -17,8 +17,7 @@ export async function GET(request: NextRequest) {
     return Response.json(result)
   } catch (error) {
     const isTimeout =
-      error instanceof Error &&
-      (error.name === 'AbortError' || error.message.includes('abort'))
+      error instanceof Error && error.name === 'AbortError'
     const message = isTimeout
       ? 'O site demorou muito para responder. Tente novamente ou insira o conteúdo manualmente.'
       : 'Não conseguimos acessar este site. Insira o conteúdo manualmente.'
