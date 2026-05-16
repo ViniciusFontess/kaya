@@ -91,43 +91,52 @@ export default function ChannelsPage() {
     setSaving(true)
     setSaveError('')
 
-    const res = await fetch('/api/channels', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        evolution_api_url: apiUrl.trim(),
-        evolution_api_key: apiKey.trim(),
-        evolution_instance_name: instanceName.trim(),
-      }),
-    })
+    try {
+      const res = await fetch('/api/channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          evolution_api_url: apiUrl.trim(),
+          evolution_api_key: apiKey.trim(),
+          evolution_instance_name: instanceName.trim(),
+        }),
+      })
 
-    const data = await res.json() as { error?: string }
-    setSaving(false)
+      const data = await res.json() as { error?: string }
 
-    if (!res.ok) {
-      setSaveError(data.error ?? 'Erro ao salvar')
-      return
-    }
+      if (!res.ok) {
+        setSaveError(data.error ?? 'Erro ao salvar')
+        return
+      }
 
-    setConfigured(true)
-    setEditing(false)
+      setConfigured(true)
+      setEditing(false)
 
-    const s = await fetchStatus()
-    setState(s)
+      const s = await fetchStatus()
+      setState(s)
 
-    if (s !== 'open') {
-      await fetchQr()
-      startPolling()
+      if (s !== 'open') {
+        await fetchQr()
+        startPolling()
+      }
+    } catch {
+      setSaveError('Erro de conexão. Verifique sua internet e tente novamente.')
+    } finally {
+      setSaving(false)
     }
   }
 
   async function disconnect() {
     stopPolling()
-    await fetch('/api/channels', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'disconnect' }),
-    })
+    try {
+      await fetch('/api/channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect' }),
+      })
+    } catch {
+      // Proceed with local state reset even on network error
+    }
     setState('unconfigured')
     setConfigured(false)
     setEditing(false)
