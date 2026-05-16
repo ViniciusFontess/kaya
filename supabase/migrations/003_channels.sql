@@ -13,6 +13,9 @@ UPDATE leads SET status = 'novo' WHERE status = 'open' OR status IS NULL;
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_leads_tenant_status ON leads(tenant_id, status);
 
--- 4. RLS: permitir UPDATE no próprio tenant
+-- 4. Adicionar leads ao Supabase Realtime (necessário para Kanban em tempo real)
+ALTER PUBLICATION supabase_realtime ADD TABLE leads;
+
+-- 5. RLS: permitir UPDATE no próprio tenant
 CREATE POLICY "tenants_update_own" ON tenants
   FOR UPDATE USING (id IN (SELECT tenant_id FROM users WHERE id = auth.uid()));
