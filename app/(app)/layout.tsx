@@ -14,7 +14,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('id', user.id)
     .single()
 
-  const tenantName = (userData?.tenants as { name: string } | null)?.name ?? 'Meu Negócio'
+  const tenants = userData?.tenants as { name: string }[] | undefined
+  const tenantName = tenants?.[0]?.name ?? 'Meu Negócio'
 
   return (
     <div style={{ display: 'flex', background: 'var(--paper)', minHeight: '100vh' }}>
