@@ -66,6 +66,9 @@ export async function POST(request: NextRequest) {
   const service = createServiceClient()
 
   // Upsert lead
+  // Note: upsert resets status to 'open' on every inbound message.
+  // Future: use INSERT ... ON CONFLICT DO UPDATE SET name = EXCLUDED.name, last_message_at = EXCLUDED.last_message_at
+  // to preserve manually-set status. Acceptable for MVP.
   const { data: lead } = await service
     .from('leads')
     .upsert(
@@ -78,6 +81,8 @@ export async function POST(request: NextRequest) {
   if (!lead?.id) return Response.json({ received: true })
 
   // Upsert conversation
+  // Note: upsert resets mode to 'auto' on every inbound message.
+  // Future: use INSERT ... ON CONFLICT DO UPDATE SET ... to preserve manually-set mode. Acceptable for MVP.
   const { data: conversation } = await service
     .from('conversations')
     .upsert(
@@ -90,7 +95,7 @@ export async function POST(request: NextRequest) {
   if (!conversation?.id) return Response.json({ received: true })
 
   // Insert inbound message
-  const { data: insertedMsg } = await service
+  const { data: insertedMsg, error: msgError } = await service
     .from('messages')
     .insert({
       tenant_id: tenantId,
@@ -100,6 +105,11 @@ export async function POST(request: NextRequest) {
     })
     .select('id')
     .single()
+
+  if (msgError || !insertedMsg?.id) {
+    console.error('[webhook] Failed to insert message:', msgError?.message)
+    return Response.json({ received: true })
+  }
 
   // Update lead.last_message_at
   await service
@@ -120,21 +130,28 @@ export async function POST(request: NextRequest) {
     knowledge_base: configRow?.knowledge_base ?? '',
   }
 
-  const { text: replyText } = await generateResponse(
-    [{ role: 'user', content: text }],
-    agentConfig
-  )
+  let replyText: string
+  try {
+    const result = await generateResponse(
+      [{ role: 'user', content: text }],
+      agentConfig
+    )
+    replyText = result.text
+  } catch (e) {
+    console.error('[webhook] generateResponse failed:', e)
+    replyText = ''
+  }
 
-  // Save suggested reply on the message we just inserted
-  if (insertedMsg?.id) {
+  // Save suggested reply on the message we just inserted (skip if generateResponse failed)
+  if (replyText && insertedMsg?.id) {
     await service
       .from('messages')
       .update({ suggested_reply: replyText })
       .eq('id', insertedMsg.id)
   }
 
-  // Send reply via Evolution API (only if key is configured)
-  if (process.env.EVOLUTION_API_KEY && process.env.EVOLUTION_API_URL) {
+  // Send reply via Evolution API (only if key is configured and reply generated)
+  if (replyText && process.env.EVOLUTION_API_KEY && process.env.EVOLUTION_API_URL) {
     const instance = process.env.EVOLUTION_INSTANCE ?? 'default'
     await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${instance}`, {
       method: 'POST',
