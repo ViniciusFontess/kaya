@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => null)
-  const { conversationId, message } = body ?? {}
+  const { conversationId, message, messageId } = body ?? {}
 
   if (!conversationId || !message) {
     return Response.json(
@@ -37,6 +37,18 @@ export async function POST(request: NextRequest) {
   }
 
   const tenantId: string = userData.tenant_id
+
+  // Verify conversation belongs to this tenant (RLS-enforced check)
+  const { data: conversation } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('id', conversationId)
+    .eq('tenant_id', tenantId)
+    .single()
+
+  if (!conversation) {
+    return Response.json({ error: 'Conversation not found' }, { status: 404 })
+  }
 
   // Load agent config
   const { data: configRow } = await supabase
@@ -69,23 +81,31 @@ export async function POST(request: NextRequest) {
 
   const { text, mock } = await generateResponse(messages, agentConfig)
 
-  // Save suggested_reply on the most recent user message in this conversation
+  // Save suggested_reply on the specified or most recent user message in this conversation
   // Use service client to bypass RLS (no UPDATE policy exists for regular users)
   const service = createServiceClient()
-  const { data: lastUserMsg } = await service
-    .from('messages')
-    .select('id')
-    .eq('conversation_id', conversationId)
-    .eq('role', 'user')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
 
-  if (lastUserMsg?.id) {
+  let targetMessageId: string | null = messageId ?? null
+
+  if (!targetMessageId) {
+    // Fallback: find the most recent user message in this conversation
+    const { data: lastUserMsg } = await service
+      .from('messages')
+      .select('id')
+      .eq('conversation_id', conversationId)
+      .eq('tenant_id', tenantId)
+      .eq('role', 'user')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+    targetMessageId = lastUserMsg?.id ?? null
+  }
+
+  if (targetMessageId) {
     await service
       .from('messages')
       .update({ suggested_reply: text })
-      .eq('id', lastUserMsg.id)
+      .eq('id', targetMessageId)
   }
 
   return Response.json({ reply: text, mock })
