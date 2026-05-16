@@ -24,6 +24,7 @@ const NICHES = ['Saúde/Clínica', 'Academia/Fitness', 'Imobiliária', 'Educaç�
 export default function SettingsPage() {
   const supabaseRef = useRef(createClient())
   const supabase = supabaseRef.current
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -51,7 +52,7 @@ export default function SettingsPage() {
         .from('users')
         .select('tenant_id')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       const tid = userData?.tenant_id
       if (!tid) {
@@ -80,6 +81,12 @@ export default function SettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+    }
+  }, [])
+
   async function save() {
     if (!tenantId) return
     setSaving(true)
@@ -101,7 +108,8 @@ export default function SettingsPage() {
     } else {
       setHasConfig(true)
       setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+      savedTimerRef.current = setTimeout(() => setSaved(false), 3000)
     }
     setSaving(false)
   }
