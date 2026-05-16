@@ -7,6 +7,7 @@ const navItems = [
   { id: 'dashboard', label: 'Resumo', href: '/dashboard', icon: '◐' },
   { id: 'inbox', label: 'Conversas', href: '/inbox', icon: '◯' },
   { id: 'leads', label: 'Leads', href: '/leads', icon: '◑' },
+  { id: 'channels', label: 'Canais', href: '/channels', icon: '◎' },
   { id: 'settings', label: 'Ajustes', href: '/settings', icon: '◕' },
 ]
 
