@@ -11,6 +11,7 @@ interface Config {
   tone: Tone
   niche: string
   knowledge_base: string
+  calendar_url: string
 }
 
 const TONES: { id: Tone; label: string; desc: string }[] = [
@@ -36,6 +37,7 @@ export default function SettingsPage() {
     tone: 'descontraido',
     niche: 'Outro',
     knowledge_base: '',
+    calendar_url: '',
   })
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function SettingsPage() {
 
       const { data: cfg } = await supabase
         .from('agent_configs')
-        .select('tone, niche, knowledge_base')
+        .select('tone, niche, knowledge_base, calendar_url')
         .eq('tenant_id', tid)
         .maybeSingle()
 
@@ -73,6 +75,7 @@ export default function SettingsPage() {
           tone: (cfg.tone ?? 'descontraido') as Tone,
           niche: cfg.niche ?? 'Outro',
           knowledge_base: cfg.knowledge_base ?? '',
+          calendar_url: cfg.calendar_url ?? '',
         })
       }
       setLoading(false)
@@ -99,6 +102,7 @@ export default function SettingsPage() {
         tone: config.tone,
         niche: config.niche,
         knowledge_base: config.knowledge_base,
+        calendar_url: config.calendar_url.trim() || null,
       },
       { onConflict: 'tenant_id' }
     )
@@ -244,6 +248,21 @@ export default function SettingsPage() {
               placeholder="Descreva seu negócio, serviços, diferenciais, horários…"
               onChange={(e) => setConfig((c) => ({ ...c, knowledge_base: e.target.value }))}
             />
+          </div>
+
+          {/* Calendar URL */}
+          <div style={{ marginBottom: 28 }}>
+            <span style={labelStyle}>Link de agendamento (Cal.com, Calendly…)</span>
+            <input
+              type="url"
+              style={inputStyle}
+              value={config.calendar_url}
+              placeholder="https://cal.com/seunome/30min"
+              onChange={(e) => setConfig((c) => ({ ...c, calendar_url: e.target.value }))}
+            />
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6, fontFamily: 'var(--sans)' }}>
+              Quando um lead quiser agendar, o agente vai enviar este link automaticamente.
+            </div>
           </div>
 
           {/* Feedback */}

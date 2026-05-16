@@ -7,6 +7,7 @@ export interface AgentConfig {
   tone: 'descontraido' | 'formal' | 'consultivo'
   niche: string
   knowledge_base: string
+  calendar_url?: string
 }
 
 const TONE_DESCRIPTIONS: Record<AgentConfig['tone'], string> = {
@@ -33,12 +34,18 @@ export async function generateResponse(
   // Fix 3: Truncate knowledge_base to 6000 chars
   const kb = (agentConfig.knowledge_base ?? '').slice(0, 6_000)
 
-  const systemPrompt = [
+  const lines = [
     `Você é Kaya, assistente de vendas de um negócio de ${agentConfig.niche}.`,
     `Tom: ${TONE_DESCRIPTIONS[agentConfig.tone]}.`,
     `Sobre o negócio: ${kb}`,
     'Responda sempre em português, de forma concisa (máximo 3 parágrafos). Seja direto e útil.',
-  ].join('\n')
+  ]
+  if (agentConfig.calendar_url) {
+    lines.push(
+      `Quando o lead demonstrar interesse em agendar uma consulta, visita ou demonstração, mencione que pode agendar diretamente aqui: ${agentConfig.calendar_url}`
+    )
+  }
+  const systemPrompt = lines.join('\n')
 
   try {
     const response = await client.messages.create({
